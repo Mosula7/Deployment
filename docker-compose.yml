@@ -6,3 +6,10 @@ services:
     ports:
       - "5000:5000"
     tty: true 
+
+  batch:
+    build: batch
+    tty: true
+    volumes:
+     - ./batch/predict.py:/app/predict.py 
+
