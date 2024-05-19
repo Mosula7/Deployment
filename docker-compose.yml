@@ -2,14 +2,10 @@ version: "3.8"
 
 services:
   app:
-    build: app
+    build: webserver
     ports:
       - "5000:5000"
     tty: true 
-
-  batch:
-    build: batch
-    tty: true
     volumes:
-     - ./batch/predict.py:/app/predict.py 
-
+      - ./models:/app/models
+      - ./webserver/templates:/app/templates

@@ -5,7 +5,6 @@ COPY ./requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY ./app.py /app/app.py
-COPY ./templates /app/templates
-COPY ./models /app/models
+#COPY ./templates /app/templates
 
 CMD ["python", "app.py"]
