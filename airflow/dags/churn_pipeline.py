@@ -43,7 +43,7 @@ def process_data(data_name):
     columns_str = str(tuple(df.columns)).replace("'", "")
     for _, row in df.iterrows():
         sql = f"""
-            INSERT INTO churn_raw {columns_str}
+            INSERT INTO churn_data {columns_str}
             VALUES {tuple(row)}
         """
         cur.execute(sql)
