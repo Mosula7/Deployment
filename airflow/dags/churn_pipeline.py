@@ -124,7 +124,6 @@ def split_data_and_train_model():
 
         metrics[f'{key}_auc'] = auc
         metrics[f'{key}_acc'] = acc
-    
     model_name = f'model_{datetime.now().strftime("%d_%m_%Y_%H_%M_%S")}'
 
     sql = f"""
@@ -170,7 +169,6 @@ def batch_predict():
             VALUES {tuple(row)}
         """
         cur.execute(sql)
-    
     conn.commit()
     cur.close()
     conn.close()
@@ -199,5 +197,5 @@ with DAG(
         python_callable=batch_predict,
     )
 
-    task1 >> task2 
+    task1 >> task2
     task1 >> task3
