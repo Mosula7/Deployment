@@ -1,11 +1,13 @@
 import psycopg2
 from airflow import DAG
-from datetime import datetime, timedelta
+from datetime import datetime
 from airflow.operators.python import PythonOperator
 
+
 def conf_db():
-    conn = psycopg2.connect(dbname="postgres", user="airflow", password="airflow", host="host.docker.internal")
-    conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT) 
+    conn = psycopg2.connect(dbname="postgres", user="airflow",
+                            password="airflow", host="host.docker.internal")
+    conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
     cur = conn.cursor()
 
     schema_name = "churn"
@@ -15,12 +17,14 @@ def conf_db():
     cur.close()
     conn.close()
 
-    conn = psycopg2.connect(dbname="churn", user="airflow", password="airflow", host="host.docker.internal")
+    conn = psycopg2.connect(dbname="churn", user="airflow", password="airflow",
+                            host="host.docker.internal")
     cur = conn.cursor()
 
-    sql_create_churn_data = f"""
+    sql_create_churn_data = """
         CREATE TABLE IF NOT EXISTS churn_data (
             id  SERIAL PRIMARY KEY,
+            hist_date DATE default current_date,
             customer_id  VARCHAR(32),
             GENDER INT,
             SENIOR_CITIZEN INT,
@@ -45,22 +49,24 @@ def conf_db():
         );
         """
 
-    sql_create_models = f"""
-        CREATE TABLE IF NOT EXISTS models (
+    sql_create_models = """
+        CREATE TABLE IF NOT EXISTS churn_models (
             model_id SERIAL PRIMARY KEY,
+            train_date date default current_date,
             model_name VARCHAR(255) NOT NULL,
             model_params JSONB,
             model_metrics JSONB
         );
         """
 
-    sql_create_predictions = f"""
-        CREATE TABLE IF NOT EXISTS predictions (
+    sql_create_predictions = """
+        CREATE TABLE IF NOT EXISTS churn_predictions (
             prediction_id SERIAL PRIMARY KEY,
             customer_id VARCHAR(32),
-            hist_date VARCHAR(32),
             model_name VARCHAR(32),
-            prediction FLOAT NOT NULL
+            hist_date date default current_date,
+            prediction FLOAT NOT NULL,
+            flag VARCHAR(32)
         );
         """
 
@@ -75,3 +81,15 @@ def conf_db():
 
     cur.close()
     conn.close()
+
+
+with DAG(
+    dag_id='config_db_v8',
+    description='',
+    start_date=datetime(2024, 4, 28),
+    schedule_interval='@once'
+) as dag:
+    task1 = PythonOperator(
+        task_id='conf',
+        python_callable=conf_db
+    )

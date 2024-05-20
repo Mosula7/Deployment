@@ -1,10 +1,16 @@
 import catboost as cat
 import os
 from flask import Flask, render_template, request, redirect, url_for
+import psycopg2
+import json
+
+
+with open('predict_config.json') as file:
+    model_name = json.load(file)['model_name']
 
 app = Flask(__name__)
 model = cat.CatBoostClassifier()
-model.load_model(os.path.join('models', 'model'))
+model.load_model(os.path.join('models', model_name))
 
 
 @app.route('/')
@@ -62,6 +68,21 @@ def predict():
 
         probability = round(model.predict_proba([data])[:, -1][0], 4)
         result = round(probability)
+
+        conn = psycopg2.connect(dbname="postgres", user="airflow",
+                                password="airflow", host="host.docker.internal"
+                                )
+        cur = conn.cursor()
+
+        sql = f"""
+        INSERT INTO churn_predictions (model_name, prediction, flag)
+        VALUES ({model_name}, {probability}, 'web')
+        """
+        cur.execute(sql)
+        conn.commit()
+
+        cur.close()
+        conn.close()
         return redirect(url_for('result', result=result,
                                 probability=probability))
     return render_template('predict.html')
