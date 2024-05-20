@@ -69,14 +69,14 @@ def predict():
         probability = round(model.predict_proba([data])[:, -1][0], 4)
         result = round(probability)
 
-        conn = psycopg2.connect(dbname="postgres", user="airflow",
+        conn = psycopg2.connect(dbname="churn", user="airflow",
                                 password="airflow", host="host.docker.internal"
                                 )
         cur = conn.cursor()
 
         sql = f"""
         INSERT INTO churn_predictions (model_name, prediction, flag)
-        VALUES ({model_name}, {probability}, 'web')
+        VALUES ('{model_name}', {probability}, 'web')
         """
         cur.execute(sql)
         conn.commit()

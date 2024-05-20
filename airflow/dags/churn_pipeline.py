@@ -38,12 +38,14 @@ def process_data(data_name):
     for col in binary_cols:
         df_processed[col] = np.where(df_processed[col] == "yes", 1, 0)
         df_processed[col] = df_processed[col].astype("int32")
+    df_processed['GENDER'] = np.where(df_processed['GENDER'] == 'female', 1, 0)
+
     conn = psycopg2.connect(dbname="churn", user="airflow", password="airflow",
                             host="host.docker.internal")
     cur = conn.cursor()
 
-    columns_str = str(tuple(df.columns)).replace("'", "")
-    for _, row in df.iterrows():
+    columns_str = str(tuple(df_processed.columns)).replace("'", "")
+    for _, row in df_processed.iterrows():
         sql = f"""
             INSERT INTO churn_data {columns_str}
             VALUES {tuple(row)}
@@ -61,10 +63,10 @@ def split_data_and_train_model():
     cur = conn.cursor()
 
     df = pd.read_sql("""
-    select * from churn_date
+    select * from churn_data
     """, con=conn).drop(columns=['id', 'customer_id', 'hist_date'])
 
-    target = 'CHURN'
+    target = 'churn'
     test_size = 0.15
     val_size = test_size / (1 - test_size)
     random_state = 0
@@ -87,16 +89,16 @@ def split_data_and_train_model():
     y_test = test[target]
 
     cat_columns = [
-        'MULTIPLE_LINES',
-        'INTERNET_SERVICE',
-        'ONLINE_SECURITY',
-        'ONLINE_BACKUP',
-        'DEVICE_PROTECTION',
-        'TECH_SUPPORT',
-        'STREAMING_TV',
-        'STREAMING_MOVIES',
-        'CONTRACT',
-        'PAYMENT_METHOD'
+        'multiple_lines',
+        'internet_service',
+        'online_security',
+        'online_backup',
+        'device_protection',
+        'tech_support',
+        'streaming_tv',
+        'streaming_movies',
+        'contract',
+        'payment_method'
     ]
     with open('model_config.json') as file:
         config = json.load(file)
@@ -122,10 +124,13 @@ def split_data_and_train_model():
 
         metrics[f'{key}_auc'] = auc
         metrics[f'{key}_acc'] = acc
+    
+    model_name = f'model_{datetime.now().strftime("%d_%m_%Y_%H_%M_%S")}'
 
     sql = f"""
-        INSERT INTO models (model_params, model_metrics)
+        INSERT INTO churn_models (model_params, model_name, model_metrics)
         VALUES ('{str(params).replace("'", '"')}',
+                '{model_name}',
                 '{str(metrics).replace("'", '"')}')
     """
     cur.execute(sql)
@@ -134,8 +139,7 @@ def split_data_and_train_model():
     cur.close()
     conn.close()
 
-    model.save_model(os.path.join('models',
-                     f'model_{datetime.now().strftime("%d_%m_%Y_%H_%M_%S")}'))
+    model.save_model(os.path.join('models', model_name))
 
 
 def batch_predict():
@@ -149,17 +153,20 @@ def batch_predict():
     model.load_model(os.path.join('models', model_name))
 
     df = pd.read_sql("""
-    select * from churn_date
-    """, con=conn).drop(columns=['id', 'customer_id', 'hist_date', 'churn'])
+    select * from churn_data
+    """, con=conn)
+
+    df.columns = [col.upper() for col in df.columns]
 
     df['prediction'] = model.predict_proba(df[model.feature_names_])[:, -1]
-    df = df.loc[:, ['customer_id', 'hist_date', 'prediction']]
+    df = df.loc[:, ['CUSTOMER_ID', 'prediction']]
     df['model_name'] = model_name
+    df['flag'] = 'batch'
 
     columns_str = str(tuple(df.columns)).replace("'", "")
     for _, row in df.iterrows():
         sql = f"""
-            INSERT INTO predictions {columns_str}
+            INSERT INTO churn_predictions {columns_str}
             VALUES {tuple(row)}
         """
         cur.execute(sql)
@@ -171,7 +178,7 @@ def batch_predict():
 
 with DAG(
     default_args=default_args,
-    dag_id='fill_data_v12',
+    dag_id='fill_data_v24',
     description='Processes, uploads data to the database and trains model',
     start_date=datetime(2024, 4, 28),
     schedule_interval='@monthly'

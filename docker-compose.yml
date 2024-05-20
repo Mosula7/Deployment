@@ -75,7 +75,8 @@ services:
     volumes:
       - ./models:/app/models
       - ./webserver/templates:/app/templates
-      - ./preict_config.json:/app/preidct_config.json
+      - ./predict_config.json:/app/predict_config.json
+      - ./webserver/app.py:/app/app.py
     tty: true 
 
 volumes:
