@@ -2,7 +2,7 @@ version: "3.8"
 
 x-airflow-common:
   &airflow-common
-  build: .
+  build: airflow
   environment:
     &airflow-common-env
     AIRFLOW__CORE__EXECUTOR: LocalExecutor
@@ -12,8 +12,8 @@ x-airflow-common:
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     AIRFLOW__SCHEDULER__MIN_FILE_PROCESS_INTERVAL: 10
   volumes:
-    - ./dags:/opt/airflow/dags
-    - ./logs:/opt/airflow/logs
+    - ./airflow/dags:/opt/airflow/dags
+    - ./airflow/logs:/opt/airflow/logs
     - ./data:/opt/airflow/data
     - ./models:/opt/airflow/models
     - ./model_config.json:/opt/airflow/model_config.json

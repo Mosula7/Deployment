@@ -1,2 +1,4 @@
 .webserver
 catboost_info
+airflow/logs/** 
+**/__pycache__

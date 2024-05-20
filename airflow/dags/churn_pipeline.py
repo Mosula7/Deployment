@@ -171,7 +171,7 @@ def batch_predict():
 
 with DAG(
     default_args=default_args,
-    dag_id='fill_data_v11',
+    dag_id='fill_data_v12',
     description='Processes, uploads data to the database and trains model',
     start_date=datetime(2024, 4, 28),
     schedule_interval='@monthly'
@@ -183,7 +183,7 @@ with DAG(
     )
 
     task2 = PythonOperator(
-        task_id='split_data',
+        task_id='train_model',
         python_callable=split_data_and_train_model,
     )
 
