@@ -1,1 +1,1 @@
-from .web_funcs import predict, result
+from .web_funcs import predict, result  # noqa: F401

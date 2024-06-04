@@ -12,7 +12,7 @@ default_args = {
 
 with DAG(
     default_args=default_args,
-    dag_id='fill_data_v26',
+    dag_id='churn_pipeline_v26',
     description='Processes, uploads data to the database and trains model',
     start_date=datetime(2024, 4, 28),
     schedule_interval='@monthly'

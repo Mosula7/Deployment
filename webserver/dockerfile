@@ -6,8 +6,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY ./src /app/src
 
-RUN chmod -R 770 /app
-
 ENV PATH="/app:$PATH"
 ENV PYTHONPATH "/app/src"
 RUN pip install -e /app/src/web_utils
