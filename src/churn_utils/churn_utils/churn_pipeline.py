@@ -6,7 +6,6 @@ import numpy as np
 import catboost as cat
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, roc_auc_score
-
 import psycopg2
 from datetime import datetime
 

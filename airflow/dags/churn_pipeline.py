@@ -2,7 +2,7 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime, timedelta
 
-import churn_utils 
+import churn_utils
 
 default_args = {
     'owner': 'mosula',
