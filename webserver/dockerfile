@@ -1,10 +1,15 @@
 FROM python:3.12.2
 
 WORKDIR /app
-COPY ./requirements.txt ./
+COPY /webserver/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-#COPY ./app.py /app/app.py
-#COPY ./templates /app/templates
+COPY ./src /app/src
+
+RUN chmod -R 770 /app
+
+ENV PATH="/app:$PATH"
+ENV PYTHONPATH "/app/src"
+RUN pip install -e /app/src/web_utils
 
 CMD ["python", "app.py"]

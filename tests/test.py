@@ -1,6 +1,5 @@
 import pandas as pd
 import os
-
 import catboost as cat
 
 df = pd.read_csv(os.path.join('..', 'data', 'data.csv'))
@@ -39,11 +38,9 @@ def test_model():
                 data.append(0)
         else:
             data.append(value)
-    
     pred = model.predict_proba([data])
 
     assert isinstance(pred[0][0], float)
     assert isinstance(pred[0][1], float)
     assert 0 <= pred[0][0] <= 1
     assert 0 <= pred[0][1] <= 1
-

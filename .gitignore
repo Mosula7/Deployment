@@ -2,5 +2,6 @@
 catboost_info
 airflow/logs/** 
 **/__pycache__
+**/.pytest_cache
 .env
 .vscode

@@ -1,0 +1,8 @@
+setup.py
+web_utils/__init__.py
+web_utils/web_funcs.py
+web_utils.egg-info/PKG-INFO
+web_utils.egg-info/SOURCES.txt
+web_utils.egg-info/dependency_links.txt
+web_utils.egg-info/not-zip-safe
+web_utils.egg-info/top_level.txt

@@ -3,7 +3,13 @@ FROM apache/airflow:2.9.0
 USER root
 
 RUN apt-get update && apt-get install libgomp1
-COPY requirements.txt /requirements.txt
+COPY airflow/requirements.txt /requirements.txt
+COPY ./src /opt/airflow/src
+
+RUN sudo chmod -R 770 /opt/airflow
 
 USER airflow
 RUN pip install --no-cache-dir -r /requirements.txt
+ENV PATH="{$AIRFLOW_HOME}:$PATH"
+ENV PYTHONPATH "{AIRFLOW_HOME}/src"
+RUN pip install -e /opt/airflow/src/churn_utils
