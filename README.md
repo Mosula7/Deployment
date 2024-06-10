@@ -17,6 +17,8 @@ DB_USER="airflow"
 DB_PASS="airflow"
 ```
 This configuration will need to be changed if you want to connect to a different database
+**IMPORTANT** If you want to run the project directry on your machine without docker also copy .env file into the airflow/dags directory. 
+When the project is run in docker a volume is created on .env file in the dags directory. 
 
 * first, to initialize the postgres database run:
 ```
