@@ -1,12 +1,22 @@
 # Deployment
 
 To run the container you need to follow the following steps:
-* make an .env file with AIRFLOW_UID and AIRFLOW_GID, for example:
+* make an .env file in the Deployment directory with AIRFLOW_UID and AIRFLOW_GID, for example:
 ```
 AIRFLOW_UID=50000
 AIRFLOW_GID=0
 ```
 **IMPORTANT:** If you want to run the container you either need to run it under GID 0 or UID 50000 (or both)
+Also, you will need to specify database config parameters in the env file. 
+If you want to connect to the database that is being created in this projects docker compose file you will need to include the following configuration:
+```
+DB_HOST="postgres"
+DB_NAME="postgres"
+DB_PORT="5432"
+DB_USER="airflow"
+DB_PASS="airflow"
+```
+This configuration will need to be changed if you want to connect to a different database
 
 * first, to initialize the postgres database run:
 ```
