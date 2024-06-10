@@ -8,7 +8,7 @@ AIRFLOW_GID=0
 ```
 **IMPORTANT:** If you want to run the container you either need to run it under GID 0 or UID 50000 (or both) \
 Also, you will need to specify database config parameters in the env file. \
-If you want to connect to the database that is being created in this projects docker compose file you will need to include the following configuration: \
+If you want to connect to the database that is being created in this projects docker compose file you will need to include the following configuration: 
 ```
 DB_HOST="postgres"
 DB_NAME="postgres"
@@ -17,8 +17,8 @@ DB_USER="airflow"
 DB_PASS="airflow"
 ```
 This configuration will need to be changed if you want to connect to a different database  \
-**IMPORTANT** If you want to run the project directry on your machine without docker also copy .env file into the airflow/dags directory. \
-When the project is run in docker a volume is created on .env file in the dags directory. \
+**IMPORTANT:** If you want to run the project directry on your machine without docker also copy .env file into the airflow/dags directory. \
+When the project is run in docker a volume is created on .env file in the dags directory. 
 
 * first, to initialize the postgres database run:
 ```
