@@ -10,21 +10,26 @@ import psycopg2
 from datetime import datetime
 
 
-def conf_db():
-    conn = psycopg2.connect(dbname="postgres", user="airflow",
-                            password="airflow", host="host.docker.internal")
+def make_conn(name, user, password, host, port):
+    return psycopg2.connect(dbname=name,
+                            user=user,
+                            password=password,
+                            host=host,
+                            port=port)
+
+
+def conf_db(db_name, schema_name, user, password, host, port):
+    conn = make_conn(db_name, user, password, host, port)
     conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
     cur = conn.cursor()
 
-    schema_name = "churn"
     cur.execute(f"""CREATE DATABASE {schema_name};""")
     conn.commit()
 
     cur.close()
     conn.close()
 
-    conn = psycopg2.connect(dbname="churn", user="airflow", password="airflow",
-                            host="host.docker.internal")
+    conn = make_conn(schema_name, user, password, host, port)
     cur = conn.cursor()
 
     sql_create_churn_data = """
@@ -89,7 +94,7 @@ def conf_db():
     conn.close()
 
 
-def process_data(data_name):
+def process_data(data_name, schema_name, user, password, host, port):
     df = pd.read_csv(os.path.join('data', data_name))
 
     binary_cols = [
@@ -109,8 +114,7 @@ def process_data(data_name):
         df_processed[col] = df_processed[col].astype("int32")
     df_processed['GENDER'] = np.where(df_processed['GENDER'] == 'female', 1, 0)
 
-    conn = psycopg2.connect(dbname="churn", user="airflow", password="airflow",
-                            host="host.docker.internal")
+    conn = make_conn(schema_name, user, password, host, port)
     cur = conn.cursor()
 
     columns_str = str(tuple(df_processed.columns)).replace("'", "")
@@ -126,9 +130,8 @@ def process_data(data_name):
     conn.close()
 
 
-def split_data_and_train_model():
-    conn = psycopg2.connect(dbname="churn", user="airflow",
-                            password="airflow", host="host.docker.internal")
+def split_data_and_train_model(schema_name, user, password, host, port):
+    conn = make_conn(schema_name, user, password, host, port)
     cur = conn.cursor()
 
     df = pd.read_sql("""
@@ -210,9 +213,8 @@ def split_data_and_train_model():
     model.save_model(os.path.join('models', model_name))
 
 
-def batch_predict():
-    conn = psycopg2.connect(dbname="churn", user="airflow",
-                            password="airflow", host="host.docker.internal")
+def batch_predict(schema_name, user, password, host, port):
+    conn = make_conn(schema_name, user, password, host, port)
     cur = conn.cursor()
 
     with open('predict_config.json') as file:

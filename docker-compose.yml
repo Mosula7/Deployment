@@ -2,7 +2,6 @@ version: "3.8"
 
 x-airflow-common:
   &airflow-common
-  #build: airflow
   build:
       context: .
       dockerfile: airflow/dockerfile
@@ -21,8 +20,11 @@ x-airflow-common:
     - ./models:/opt/airflow/models
     - ./model_config.json:/opt/airflow/model_config.json
     - ./predict_config.json:/opt/airflow/predict_config.json
+    - ./.env:/opt/airflow/dags/.env
 
   user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-50000}"
+  networks:
+    - my_network
   depends_on:
     postgres:
       condition: service_healthy
@@ -38,6 +40,8 @@ services:
       - postgres-db-volume:/var/lib/postgresql/data
     ports:
       - 5432:5432
+    networks:
+      - my_network
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "airflow"]
       interval: 5s
@@ -72,7 +76,6 @@ services:
       _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
 
   webserver:
-    #build: webserver
     build:
       context: .
       dockerfile: webserver/dockerfile
@@ -85,6 +88,10 @@ services:
       - ./webserver/app.py:/app/app.py
       - ./webserver/test.py:/app/test.py
     tty: true 
+
+networks:
+  my_network:
+    driver: bridge
 
 volumes:
   postgres-db-volume:
