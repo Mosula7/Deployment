@@ -25,7 +25,7 @@ with DAG(
     default_args=default_args,
     dag_id='churn_pipeline_v27',
     description='Processes, uploads data to the database and trains model',
-    start_date=datetime(2024, 4, 28),
+    start_date=datetime(2024, 7, 1),
     schedule_interval='@monthly'
 ) as dag:
     task1 = PythonOperator(
@@ -39,7 +39,7 @@ with DAG(
                    "port": db_port}
     )
 
-    task2 = PythonOperator(
+    task2 = PythonOperator( 
         task_id='train_model',
         python_callable=churn_utils.split_data_and_train_model,
         op_kwargs={"schema_name": schema_name,

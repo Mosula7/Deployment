@@ -2,7 +2,9 @@ from flask import render_template, request, redirect, url_for
 import psycopg2
 
 
-def predict(model, model_name):
+def predict(model, model_name, db_name, 
+            db_user, db_pass, db_host,
+            db_port):
     if request.method == 'POST':
         form_data = {
             'gender': request.form['gender'].lower(),
@@ -52,8 +54,9 @@ def predict(model, model_name):
         probability = round(model.predict_proba([data])[:, -1][0], 4)
         result = round(probability)
 
-        conn = psycopg2.connect(dbname="churn", user="airflow",
-                                password="airflow", host="host.docker.internal"
+        conn = psycopg2.connect(dbname=db_name, user=db_user,
+                                password=db_pass, host=db_host,
+                                port=db_port
                                 )
         cur = conn.cursor()
 

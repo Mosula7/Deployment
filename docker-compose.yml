@@ -1,4 +1,4 @@
-version: "3.8"  
+#version: "3.8"  
 
 x-airflow-common:
   &airflow-common
@@ -8,7 +8,7 @@ x-airflow-common:
   environment:
     &airflow-common-env
     AIRFLOW__CORE__EXECUTOR: LocalExecutor
-    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
     AIRFLOW__CORE__FERNET_KEY: ''
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
@@ -20,7 +20,7 @@ x-airflow-common:
     - ./models:/opt/airflow/models
     - ./model_config.json:/opt/airflow/model_config.json
     - ./predict_config.json:/opt/airflow/predict_config.json
-    - ./.env:/opt/airflow/dags/.env
+    - .env:/opt/airflow/dags/.env
 
   user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-50000}"
   networks:
@@ -53,6 +53,8 @@ services:
     command: webserver
     ports:
       - 8080:8080
+    networks:
+      - my_network
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
       interval: 10s
@@ -64,6 +66,8 @@ services:
     <<: *airflow-common
     command: scheduler
     restart: always
+    networks:
+      - my_network
 
   airflow-init:
     <<: *airflow-common
@@ -74,11 +78,15 @@ services:
       _AIRFLOW_WWW_USER_CREATE: 'true'
       _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
       _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
+    networks:
+      - my_network
 
   webserver:
     build:
       context: .
       dockerfile: webserver/dockerfile
+    networks:
+      - my_network
     ports:
       - "5000:5000"
     volumes:
@@ -87,10 +95,13 @@ services:
       - ./predict_config.json:/app/predict_config.json
       - ./webserver/app.py:/app/app.py
       - ./webserver/test.py:/app/test.py
+      - .env:/app/.env
     tty: true 
+  
 
 networks:
   my_network:
+    name: my_network
     driver: bridge
 
 volumes:

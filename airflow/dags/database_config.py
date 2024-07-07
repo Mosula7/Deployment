@@ -16,9 +16,9 @@ db_pass = os.getenv("DB_PASS")
 schema_name = 'churn'
 
 with DAG(
-    dag_id='config_db_v10',
+    dag_id='config_db_v11',
     description='',
-    start_date=datetime(2024, 5, 28),
+    start_date=datetime(2024, 7, 1),
     schedule_interval='@once'
 ) as dag:
     task1 = PythonOperator(
