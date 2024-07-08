@@ -6,6 +6,7 @@ To run the container you need to follow the following steps:
 AIRFLOW_UID=50000
 AIRFLOW_GID=0
 ```
+**IMPORTANT:** If you are running the container on a linux machine make sure the files that are volumes have read permissions and for the models direcotry: write permission also
 **IMPORTANT:** If you want to run the container you either need to run it under GID 0 or UID 50000 (or both) \
 Also, you will need to specify database config parameters in the env file. \
 If you want to connect to the database that is being created in this projects docker compose file you will need to include the following configuration: 
